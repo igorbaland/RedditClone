@@ -1,2 +1,13 @@
-package com.bal.demo_reddit.dto;public class LoginRequest {
+package com.bal.demo_reddit.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class LoginRequest {
+    private String username;
+    private String password;
 }

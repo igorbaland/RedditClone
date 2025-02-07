@@ -1,6 +1,8 @@
 package com.bal.demo_reddit.security;
 
 import com.bal.demo_reddit.exceptions.SpringRedditException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import jakarta.annotation.PostConstruct;
 import org.springframework.security.core.Authentication;
@@ -11,8 +13,13 @@ import java.io.InputStream;
 import java.security.*;
 import java.security.cert.CertificateException;
 
+import static io.jsonwebtoken.Jwts.parser;
+
+
 @Service
 public class JwtProvider {
+
+
 
     private KeyStore keyStore;
 
@@ -42,4 +49,36 @@ public class JwtProvider {
             throw new SpringRedditException("Exception occurred while retrieving public key from keystore");
         }
     }
+
+    public boolean validateToken(String token) {
+        try {
+            JwtParser jwtParser = Jwts.parserBuilder()
+                    .setSigningKey(getPublicKey())
+                    .build();
+
+            jwtParser.parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+           throw new SpringRedditException("Exception occurred while validation token.");
+        }
+    }
+
+    private PublicKey getPublicKey() {
+        try {
+            return keyStore.getCertificate("springblog").getPublicKey();
+        } catch (KeyStoreException e) {
+            throw new SpringRedditException("Exception occurred while retrieving public key from the keystore");
+        }
+    }
+
+    public String getUserNameFromJwt(String token) {
+        JwtParser jwtParser = Jwts.parserBuilder()
+                .setSigningKey(getPublicKey())
+                .build();
+
+        Claims claims = jwtParser.parseClaimsJws(token).getBody();
+        return claims.getSubject();
+    }
+
+
 }
